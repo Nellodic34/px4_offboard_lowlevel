@@ -41,6 +41,7 @@ class controller {
 public:
     controller();
     void calculateControllerOutput(Eigen::VectorXd *controller_torque_thrust, Eigen::Quaterniond *desired_quaternion);
+    void calculateSMControllerOutput(Eigen::VectorXd *controller_torque_thrust, Eigen::Quaterniond *desired_quaternion)
 
     // Setters
     void setOdometry(const Eigen::Vector3d &position_W, const Eigen::Quaterniond &orientation_B_W, 
@@ -69,6 +70,7 @@ public:
         r_yaw = r_R_B_W_.eulerAngles(0, 1, 2)(2);
         r_yaw_rate = 0.0;
     }
+
 
     void setKPositionGain(const Eigen::Vector3d &PositionGain){
         position_gain_ = PositionGain;

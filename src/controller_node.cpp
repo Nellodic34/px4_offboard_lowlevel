@@ -514,7 +514,8 @@ void ControllerNode::updateControllerOutput() {
     //  calculate controller output
     Eigen::VectorXd controller_output;
     Eigen::Quaterniond desired_quaternion;
-    controller_.calculateControllerOutput(&controller_output, &desired_quaternion);
+    //controller_.calculateControllerOutput(&controller_output, &desired_quaternion);
+    controller_.calculateSMControllerOutput(&controller_output, &desired_quaternion);
     
     // Normalize the controller output
     Eigen::Vector4d normalized_torque_thrust;

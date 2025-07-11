@@ -97,3 +97,83 @@ void controller::calculateControllerOutput(
     // Output the wrench
     *controller_torque_thrust << tau, thrust;
 }
+
+
+
+void controller::calculateSMControllerOutput(Eigen::VectorXd *controller_torque_thrust, Eigen::Quaterniond *desired_quaternion) {
+        assert(controller_torque_thrust);
+
+        controller_torque_thrust->resize(4);
+
+        //---- SLIDING MODE CONTROLLER ---- 
+
+        double lambda_i = 2.0; // Sliding surface position gain
+        double lambda_a = 2.0; // Sliding surface attitude gain
+        double K_p = 0.5; // Position error gain
+        double K_a = 0.5; // Attitude error gain
+        double phi = 0.2; // Boundary layer thickness
+
+        double thrust;
+        Eigen::Matrix3d R_d_w;
+
+        // Position error
+        const Eigen::Vector3d e_p =
+                position_W_ - r_position_W_;
+
+        // Velocity error
+        const Eigen::Vector3d e_v = 
+                velocity_W_ - r_velocity_W_;
+
+        // --- POSITION CONTROL ---
+        
+        // Sliding surface for position
+        Eigen::Vector3d s_i = e_v + lambda_i*e_p;
+        
+        //Position control input
+        Eigen::Vector3d u_peq = _uav_mass * (_gravity * Eigen::Vector3d::UnitZ() + r_acceleration_W_) 
+                                - K_p*s_i/ phi;
+        
+        thrust = u_peq.dot(R_B_W_.col(2));
+
+        // --- ATTITUDE CONTROL ---
+
+        Eigen::Vector3d B_z_d;
+        B_z_d = u_peq;
+        B_z_d.normalize();
+
+        // Calculate Desired Rotational Matrix
+        const Eigen::Vector3d B_x_d(std::cos(r_yaw), std::sin(r_yaw), 0.0);
+        Eigen::Vector3d B_y_d = B_z_d.cross(B_x_d);
+        B_y_d.normalize();
+        R_d_w.col(0) = B_y_d.cross(B_z_d);
+        R_d_w.col(1) = B_y_d;
+        R_d_w.col(2) = B_z_d;
+
+        // Rotational error matrix        
+        const Eigen::Matrix3d e_R_matrix =
+                0.5 * (R_d_w.transpose() * R_B_W_ - R_B_W_.transpose() * R_d_w);
+
+        // Rotational error vector
+        Eigen::Vector3d e_R;
+        e_R << e_R_matrix(2, 1), e_R_matrix(0, 2), e_R_matrix(1, 0);
+
+        const Eigen::Vector3d omega_ref =
+                r_yaw_rate * Eigen::Vector3d::UnitZ();
+                
+        // Angular velocity error
+        const Eigen::Vector3d e_omega = angular_velocity_B_ - R_B_W_.transpose() * R_d_w * omega_ref;
+        
+        Eigen::Quaterniond q_temp(R_d_w);
+        *desired_quaternion = q_temp;
+
+        // Sliding surface for attitude
+        Eigen::Vector3d s_a = e_omega + lambda_a*e_R;
+
+        // Attitude control input
+        Eigen::Vector3d u_aeq = -K_a*s_a/ phi 
+                                - angular_velocity_B_.cross(_inertia_matrix.asDiagonal() * angular_velocity_B_)
+                                + angular_rate_gain_.cwiseProduct(e_omega); 
+
+        // Output the wrench
+        *controller_torque_thrust << u_aeq, thrust;
+}
