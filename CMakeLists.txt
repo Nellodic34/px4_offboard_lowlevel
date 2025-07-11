@@ -31,6 +31,10 @@ add_executable(circle_trajectory_node
   src/TrajectoryPublishers/circle_trajectory_node.cpp
 )
 
+add_executable(lemniscate_trajectory_node 
+  src/TrajectoryPublishers/lemniscate_trajectory_node.cpp
+)
+
 # Add dependencies for the executables
 ament_target_dependencies(offboard_controller_node
   rclcpp
@@ -46,10 +50,18 @@ ament_target_dependencies(circle_trajectory_node
   geometry_msgs
 )
 
+ament_target_dependencies(lemniscate_trajectory_node
+  rclcpp
+  geometry_msgs
+)
+
 install(TARGETS offboard_controller_node
   DESTINATION lib/${PROJECT_NAME})
 
 install(TARGETS circle_trajectory_node
+  DESTINATION lib/${PROJECT_NAME})
+
+install(TARGETS lemniscate_trajectory_node
   DESTINATION lib/${PROJECT_NAME})
 
 install(PROGRAMS
