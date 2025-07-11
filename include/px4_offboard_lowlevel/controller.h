@@ -41,7 +41,7 @@ class controller {
 public:
     controller();
     void calculateControllerOutput(Eigen::VectorXd *controller_torque_thrust, Eigen::Quaterniond *desired_quaternion);
-    void calculateSMControllerOutput(Eigen::VectorXd *controller_torque_thrust, Eigen::Quaterniond *desired_quaternion)
+    void calculateSMControllerOutput(Eigen::VectorXd *controller_torque_thrust, Eigen::Quaterniond *desired_quaternion);
 
     // Setters
     void setOdometry(const Eigen::Vector3d &position_W, const Eigen::Quaterniond &orientation_B_W, 
@@ -100,6 +100,26 @@ public:
         _gravity = gravity;
     }
 
+    void setLambdaI(double lambda) {
+        lambda_i = lambda;
+    }
+
+    void setLambdaA(double lambda) {
+        lambda_a = lambda;
+    }
+
+    void setKP(double k) {
+        K_p = k;
+    }
+
+    void setKA(double k) {
+        K_a = k;
+    }
+
+    void setPhi(double phi_value) {
+        phi = phi_value;
+    }
+
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 private:
     // UAV Parameter
@@ -112,6 +132,13 @@ private:
     Eigen::Vector3d velocity_gain_;
     Eigen::Vector3d attitude_gain_;
     Eigen::Vector3d angular_rate_gain_;
+
+    // SMC gains
+    double lambda_i;
+    double lambda_a;
+    double K_p;
+    double K_a;
+    double phi;
     
     // Current states
     Eigen::Vector3d position_W_;

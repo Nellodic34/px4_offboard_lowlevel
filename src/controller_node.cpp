@@ -181,7 +181,7 @@ void ControllerNode::loadParams() {
     this->declare_parameter("control_gains.K_w_x", 0.0);
     this->declare_parameter("control_gains.K_w_y", 0.0);
     this->declare_parameter("control_gains.K_w_z", 0.0);
-    
+
     position_gain_ << this->get_parameter("control_gains.K_p_x").as_double(),
                       this->get_parameter("control_gains.K_p_y").as_double(),
                       this->get_parameter("control_gains.K_p_z").as_double();
@@ -198,6 +198,20 @@ void ControllerNode::loadParams() {
                      this->get_parameter("control_gains.K_w_y").as_double(),
                      this->get_parameter("control_gains.K_w_z").as_double();
 
+    // SM controller gains
+    this->declare_parameter("control_gains.lambda_i", 0.0);
+    this->declare_parameter("control_gains.lambda_a", 0.0);
+    this->declare_parameter("control_gains.K_p", 0.0);
+    this->declare_parameter("control_gains.K_a", 0.0);
+    this->declare_parameter("control_gains.phi", 0.0);
+    
+    lambda_i = this->get_parameter("control_gains.lambda_i").as_double();
+    lambda_a = this->get_parameter("control_gains.lambda_a").as_double();
+    K_p = this->get_parameter("control_gains.K_p").as_double();
+    K_a = this->get_parameter("control_gains.K_a").as_double();
+    phi = this->get_parameter("control_gains.phi").as_double();
+    
+
     // pass the UAV Parameters and controller gains to the controller
     controller_.setUavMass(_uav_mass);
     controller_.setInertiaMatrix(_inertia_matrix);
@@ -206,6 +220,12 @@ void ControllerNode::loadParams() {
     controller_.setKVelocityGain(velocity_gain_);
     controller_.setKAttitudeGain(attitude_gain_);
     controller_.setKAngularRateGain(ang_vel_gain_);
+
+    controller_.setLambdaI(lambda_i);
+    controller_.setLambdaA(lambda_a);
+    controller_.setKP(K_p);
+    controller_.setKA(K_a);
+    controller_.setPhi(phi);
 }
 
 void ControllerNode::compute_ControlAllocation_and_ActuatorEffect_matrices() {

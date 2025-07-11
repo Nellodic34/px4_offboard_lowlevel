@@ -132,6 +132,13 @@ private:
     Eigen::Vector3d attitude_gain_;
     Eigen::Vector3d ang_vel_gain_;
 
+    // SMC gains
+    double lambda_i;
+    double lambda_a;
+    double K_p;
+    double K_a;
+    double phi;
+    
     // Logic switches
     int control_mode_;
     bool in_sitl_mode_;
