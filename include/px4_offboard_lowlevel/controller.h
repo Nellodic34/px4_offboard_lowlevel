@@ -40,8 +40,12 @@
 class controller {
 public:
     controller();
-    void calculateControllerOutput(Eigen::VectorXd *controller_torque_thrust, Eigen::Quaterniond *desired_quaternion);
-    void calculateSMControllerOutput(Eigen::VectorXd *controller_torque_thrust, Eigen::Quaterniond *desired_quaternion);
+    void calculateControllerOutput(Eigen::VectorXd *controller_torque_thrust, Eigen::Quaterniond *desired_quaternion,
+                                     Eigen::Vector3d *position_error, Eigen::Vector3d *velocity_error,
+                                     Eigen::Vector3d *attitude_error, Eigen::Vector3d *angular_velocity_error);
+    void calculateSMControllerOutput(Eigen::VectorXd *controller_torque_thrust, Eigen::Quaterniond *desired_quaternion,
+                                     Eigen::Vector3d *position_error, Eigen::Vector3d *velocity_error,
+                                     Eigen::Vector3d *attitude_error, Eigen::Vector3d *angular_velocity_error);
 
     // Setters
     void setOdometry(const Eigen::Vector3d &position_W, const Eigen::Quaterniond &orientation_B_W, 
@@ -139,6 +143,12 @@ private:
     double K_p;
     double K_a;
     double phi;
+
+    // Errors
+    Eigen::Vector3d position_error_;
+    Eigen::Vector3d velocity_error_;
+    Eigen::Vector3d attitude_error_;
+    Eigen::Vector3d angular_velocity_error_;
     
     // Current states
     Eigen::Vector3d position_W_;

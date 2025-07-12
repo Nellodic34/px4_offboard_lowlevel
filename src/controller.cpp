@@ -40,7 +40,11 @@ controller::controller(){
 }
 
 void controller::calculateControllerOutput(
-        Eigen::VectorXd *controller_torque_thrust, Eigen::Quaterniond *desired_quaternion) {
+        Eigen::VectorXd *controller_torque_thrust, Eigen::Quaterniond *desired_quaternion,
+        Eigen::Vector3d *position_error,
+        Eigen::Vector3d *velocity_error, 
+        Eigen::Vector3d *attitude_error, 
+        Eigen::Vector3d *angular_velocity_error) {
     assert(controller_torque_thrust);
 
     controller_torque_thrust->resize(4);
@@ -96,22 +100,25 @@ void controller::calculateControllerOutput(
 
     // Output the wrench
     *controller_torque_thrust << tau, thrust;
+    
+    *position_error = e_p;
+    *velocity_error = e_v;
+    *attitude_error = e_R;
+    *angular_velocity_error = e_omega;
 }
 
 
 
-void controller::calculateSMControllerOutput(Eigen::VectorXd *controller_torque_thrust, Eigen::Quaterniond *desired_quaternion) {
+void controller::calculateSMControllerOutput(Eigen::VectorXd *controller_torque_thrust, Eigen::Quaterniond *desired_quaternion,  
+        Eigen::Vector3d *position_error,
+        Eigen::Vector3d *velocity_error, 
+        Eigen::Vector3d *attitude_error, 
+        Eigen::Vector3d *angular_velocity_error) {
         assert(controller_torque_thrust);
 
         controller_torque_thrust->resize(4);
 
         //---- SLIDING MODE CONTROLLER ---- 
-
-        double lambda_i = 2.0; // Sliding surface position gain
-        double lambda_a = 2.0; // Sliding surface attitude gain
-        double K_p = 0.5; // Position error gain
-        double K_a = 0.5; // Attitude error gain
-        double phi = 0.2; // Boundary layer thickness
 
         double thrust;
         Eigen::Matrix3d R_d_w;
@@ -176,4 +183,8 @@ void controller::calculateSMControllerOutput(Eigen::VectorXd *controller_torque_
 
         // Output the wrench
         *controller_torque_thrust << u_aeq, thrust;
+        *position_error = e_p;
+        *velocity_error = e_v;
+        *attitude_error = e_R;
+        *angular_velocity_error = e_omega;
 }

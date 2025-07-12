@@ -65,7 +65,7 @@ private:
 
     publisher_->publish(pose_stamped);
 
-    angle += 0.01; // Change this value to control the angular speed of the circular path
+    angle += 0.001; // Change this value to control the angular speed of the circular path
   }
 
   rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr publisher_;

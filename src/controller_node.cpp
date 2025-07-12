@@ -53,6 +53,7 @@ ControllerNode::ControllerNode()
             (status_topic_, qos, std::bind(&ControllerNode::vehicleStatusCallback, this, _1));
         command_pose_sub_ = this->create_subscription<geometry_msgs::msg::PoseStamped>
             (command_pose_topic_, 10, std::bind(&ControllerNode::commandPoseCallback, this, _1));
+        
 
         // Publishers
         attitude_setpoint_publisher_ = this->create_publisher<px4_msgs::msg::VehicleAttitudeSetpoint>
@@ -67,6 +68,15 @@ ControllerNode::ControllerNode()
             (thrust_setpoint_topic_, 10);
         torque_setpoint_publisher_ = this->create_publisher<px4_msgs::msg::VehicleTorqueSetpoint>
             (torque_setpoint_topic_, 10);
+        
+        position_error_publisher_ = this->create_publisher<geometry_msgs::msg::Vector3>
+            ("/position_error", 10);
+        velocity_error_publisher_ = this->create_publisher<geometry_msgs::msg::Vector3>
+            ("/velocity_error", 10);
+        attitude_error_publisher_ = this->create_publisher<geometry_msgs::msg::Vector3>
+            ("/attitude_error", 10);
+        angular_velocity_error_publisher_ = this->create_publisher<geometry_msgs::msg::Vector3>
+            ("/angular_velocity_error", 10);
         
         // Parameters subscriber
         callback_handle_ = this->add_on_set_parameters_callback(
@@ -112,6 +122,7 @@ void ControllerNode::loadParams() {
     this->declare_parameter("uav_parameters.omega_to_pwm_coefficient.x_2", 0.0);
     this->declare_parameter("uav_parameters.omega_to_pwm_coefficient.x_1", 0.0);
     this->declare_parameter("uav_parameters.omega_to_pwm_coefficient.x_0", 0.0);
+    this->declare_parameter("controller_type", "geometric");
 
     double _uav_mass = this->get_parameter("uav_parameters.mass").as_double();
     _arm_length = this->get_parameter("uav_parameters.arm_length").as_double();
@@ -182,6 +193,7 @@ void ControllerNode::loadParams() {
     this->declare_parameter("control_gains.K_w_y", 0.0);
     this->declare_parameter("control_gains.K_w_z", 0.0);
 
+
     position_gain_ << this->get_parameter("control_gains.K_p_x").as_double(),
                       this->get_parameter("control_gains.K_p_y").as_double(),
                       this->get_parameter("control_gains.K_p_z").as_double();
@@ -210,6 +222,7 @@ void ControllerNode::loadParams() {
     K_p = this->get_parameter("control_gains.K_p").as_double();
     K_a = this->get_parameter("control_gains.K_a").as_double();
     phi = this->get_parameter("control_gains.phi").as_double();
+    controller_type_ = this->get_parameter("controller_type").as_string();
     
 
     // pass the UAV Parameters and controller gains to the controller
@@ -534,8 +547,17 @@ void ControllerNode::updateControllerOutput() {
     //  calculate controller output
     Eigen::VectorXd controller_output;
     Eigen::Quaterniond desired_quaternion;
-    //controller_.calculateControllerOutput(&controller_output, &desired_quaternion);
-    controller_.calculateSMControllerOutput(&controller_output, &desired_quaternion);
+    if(controller_type_ == "sliding_mode"){
+        controller_.calculateSMControllerOutput(&controller_output, &desired_quaternion, &position_error_, &velocity_error_, &attitude_error_, &angular_velocity_error_);
+    }else if(controller_type_ == "geometric"){
+        controller_.calculateControllerOutput(&controller_output, &desired_quaternion, &position_error_, &velocity_error_, &attitude_error_, &angular_velocity_error_);
+    }
+    
+    std::cout << "torques_and_thrust_to_rotor_velocities_ size: " 
+          << torques_and_thrust_to_rotor_velocities_.rows() << "x" 
+          << torques_and_thrust_to_rotor_velocities_.cols() << std::endl;
+    std::cout << "wrench size: " << controller_output.size() << std::endl;
+    
     
     // Normalize the controller output
     Eigen::Vector4d normalized_torque_thrust;
@@ -543,6 +565,30 @@ void ControllerNode::updateControllerOutput() {
     if (in_sitl_mode_) px4InverseSITL(&normalized_torque_thrust, &throttles, &controller_output);
     else px4Inverse(&normalized_torque_thrust, &throttles, &controller_output);
     
+    geometry_msgs::msg::Vector3 pos_err_msg;
+    pos_err_msg.x = position_error_.x();
+    pos_err_msg.y = position_error_.y();
+    pos_err_msg.z = position_error_.z();
+    position_error_publisher_->publish(pos_err_msg);
+
+    geometry_msgs::msg::Vector3 vel_err_msg;
+    vel_err_msg.x = velocity_error_.x();
+    vel_err_msg.y = velocity_error_.y();
+    vel_err_msg.z = velocity_error_.z();
+    velocity_error_publisher_->publish(vel_err_msg);
+
+    geometry_msgs::msg::Vector3 att_err_msg;
+    att_err_msg.x = attitude_error_.x();
+    att_err_msg.y = attitude_error_.y();
+    att_err_msg.z = attitude_error_.z();
+    attitude_error_publisher_->publish(att_err_msg);
+
+    geometry_msgs::msg::Vector3 ang_vel_err_msg;
+    ang_vel_err_msg.x = angular_velocity_error_.x();
+    ang_vel_err_msg.y = angular_velocity_error_.y();
+    ang_vel_err_msg.z = angular_velocity_error_.z();
+    angular_velocity_error_publisher_->publish(ang_vel_err_msg);
+
     // Publish the controller output
     if (current_status_.nav_state == px4_msgs::msg::VehicleStatus::NAVIGATION_STATE_OFFBOARD) {
         switch (control_mode_)

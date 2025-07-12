@@ -90,6 +90,11 @@ private:
     rclcpp::Publisher<px4_msgs::msg::OffboardControlMode>::SharedPtr offboard_control_mode_publisher_;
 	rclcpp::Publisher<px4_msgs::msg::VehicleCommand>::SharedPtr vehicle_command_publisher_;
 
+    rclcpp::Publisher<geometry_msgs::msg::Vector3>::SharedPtr position_error_publisher_;
+    rclcpp::Publisher<geometry_msgs::msg::Vector3>::SharedPtr velocity_error_publisher_;
+    rclcpp::Publisher<geometry_msgs::msg::Vector3>::SharedPtr attitude_error_publisher_;
+    rclcpp::Publisher<geometry_msgs::msg::Vector3>::SharedPtr angular_velocity_error_publisher_;
+
     // Services
     rcl_interfaces::msg::SetParametersResult parametersCallback(const std::vector<rclcpp::Parameter> &parameters);
     OnSetParametersCallbackHandle::SharedPtr callback_handle_;
@@ -138,6 +143,14 @@ private:
     double K_p;
     double K_a;
     double phi;
+
+    // Errors
+    Eigen::Vector3d position_error_;
+    Eigen::Vector3d velocity_error_;
+    Eigen::Vector3d attitude_error_;
+    Eigen::Vector3d angular_velocity_error_;
+
+    std::string controller_type_;
     
     // Logic switches
     int control_mode_;
