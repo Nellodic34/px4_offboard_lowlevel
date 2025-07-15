@@ -60,7 +60,7 @@ private:
 
     pose_stamped.pose.position.x = radius * cos(angle);
     pose_stamped.pose.position.y = radius * sin(angle);
-    pose_stamped.pose.position.z = 2.0;
+    pose_stamped.pose.position.z = 1.0;
     pose_stamped.pose.orientation.w = 1.0;
 
     publisher_->publish(pose_stamped);

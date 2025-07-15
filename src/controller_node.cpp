@@ -84,7 +84,7 @@ ControllerNode::ControllerNode()
 
         // Timers
         std::chrono::duration<double> offboard_period(0.33);        
-        std::chrono::duration<double> controller_period(0.01);        
+        std::chrono::duration<double> controller_period(0.001);        
         offboardTimer = this->create_wall_timer(offboard_period, [=]() {publishOffboardControlModeMsg();});
         controllerTimer = this->create_wall_timer(controller_period, [=]() {updateControllerOutput();});
     }
@@ -99,6 +99,25 @@ rcl_interfaces::msg::SetParametersResult ControllerNode::parametersCallback(cons
             if(param.get_name() == "control_mode"){
                 control_mode_ = param.as_int();
             }
+            if(param.get_name() == "control_gains.controller_type"){
+                controller_type_ = param.as_string();
+            }
+            if(param.get_name() == "control_gains.lambda_i"){
+                controller_.setLambdaI(param.as_double());
+            }
+            if(param.get_name() == "control_gains.lambda_a"){
+                controller_.setLambdaA(param.as_double());
+            }
+            if(param.get_name() == "control_gains.K_p"){
+                controller_.setKP(param.as_double());
+            }
+            if(param.get_name() == "control_gains.K_a"){
+                controller_.setKA(param.as_double());
+            }
+            if(param.get_name() == "control_gains.phi"){
+                controller_.setPhi(param.as_double());
+            }
+            
         }
         return result;
     }
@@ -122,7 +141,7 @@ void ControllerNode::loadParams() {
     this->declare_parameter("uav_parameters.omega_to_pwm_coefficient.x_2", 0.0);
     this->declare_parameter("uav_parameters.omega_to_pwm_coefficient.x_1", 0.0);
     this->declare_parameter("uav_parameters.omega_to_pwm_coefficient.x_0", 0.0);
-    this->declare_parameter("controller_type", "geometric");
+    this->declare_parameter("control_gains.controller_type", "geometric");
 
     double _uav_mass = this->get_parameter("uav_parameters.mass").as_double();
     _arm_length = this->get_parameter("uav_parameters.arm_length").as_double();
@@ -222,7 +241,7 @@ void ControllerNode::loadParams() {
     K_p = this->get_parameter("control_gains.K_p").as_double();
     K_a = this->get_parameter("control_gains.K_a").as_double();
     phi = this->get_parameter("control_gains.phi").as_double();
-    controller_type_ = this->get_parameter("controller_type").as_string();
+    controller_type_ = this->get_parameter("control_gains.controller_type").as_string();
     
 
     // pass the UAV Parameters and controller gains to the controller
@@ -548,8 +567,10 @@ void ControllerNode::updateControllerOutput() {
     Eigen::VectorXd controller_output;
     Eigen::Quaterniond desired_quaternion;
     if(controller_type_ == "sliding_mode"){
+        RCLCPP_INFO_ONCE(get_logger(),"Using SM Controller.");
         controller_.calculateSMControllerOutput(&controller_output, &desired_quaternion, &position_error_, &velocity_error_, &attitude_error_, &angular_velocity_error_);
     }else if(controller_type_ == "geometric"){
+        RCLCPP_INFO_ONCE(get_logger(),"Using Geometric Controller.");
         controller_.calculateControllerOutput(&controller_output, &desired_quaternion, &position_error_, &velocity_error_, &attitude_error_, &angular_velocity_error_);
     }
     

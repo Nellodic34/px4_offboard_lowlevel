@@ -13,9 +13,9 @@
         K_w_x: 0.5
         K_w_y: 0.5
         K_w_z: 0.1
-        lambda_i: 10.0
-        lambda_a: 10.0
-        K_p: 0.2
-        K_a: 0.2
-        phi: 0.01
-        controlller_type: "geometric"
+        lambda_i: 5.0
+        lambda_a: 5.0
+        K_p: 0.8
+        K_a: 0.8
+        phi: 0.2
+        controller_type: "sliding_mode"
