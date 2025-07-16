@@ -28,19 +28,20 @@ private:
     double cos_t = cos(t);
     double denominator = 1.0 + sin_t * sin_t;
     
-    pose_stamped.pose.position.x = a * cos_t / denominator;
-    pose_stamped.pose.position.y = a * sin_t * cos_t / denominator;
-    pose_stamped.pose.position.z = 3.0;
+    if(t < 4 * M_PI){
+      pose_stamped.pose.position.x = a * cos_t / denominator - a;
+      pose_stamped.pose.position.y = a * sin_t * cos_t / denominator;
+    } else {
+      pose_stamped.pose.position.x = 0.0; // Reset position after completing the loop
+      pose_stamped.pose.position.y = 0.0;
+    }
+    pose_stamped.pose.position.z = 2.0;
     pose_stamped.pose.orientation.w = 1.0;
 
     publisher_->publish(pose_stamped);
 
     t += 0.001; // Change this value to control the speed along the lemniscate path
     
-    // Reset parameter to avoid numerical issues with very large values
-    if (t > 2.0 * M_PI) {
-      t -= 2.0 * M_PI;
-    }
   }
 
   rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr publisher_;
