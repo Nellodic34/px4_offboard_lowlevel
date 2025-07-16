@@ -178,8 +178,7 @@ void controller::calculateSMControllerOutput(Eigen::VectorXd *controller_torque_
 
         // Attitude control input
         Eigen::Vector3d u_aeq = - K_a*s_a/(phi)
-                                - angular_velocity_B_.cross(_inertia_matrix.asDiagonal() * angular_velocity_B_)
-                                + lambda_a*e_omega; 
+                                - angular_velocity_B_.cross(_inertia_matrix.asDiagonal() * angular_velocity_B_); 
 
         // Output the wrench
         *controller_torque_thrust << u_aeq, thrust;
