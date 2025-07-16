@@ -39,6 +39,10 @@ add_executable(height_node
   src/TrajectoryPublishers/height_node.cpp
 )
 
+add_executable(custom_node 
+  src/TrajectoryPublishers/custom.cpp
+)
+
 # Add dependencies for the executables
 ament_target_dependencies(offboard_controller_node
   rclcpp
@@ -64,6 +68,11 @@ ament_target_dependencies(height_node
   geometry_msgs
 )
 
+ament_target_dependencies(custom_node
+  rclcpp
+  geometry_msgs
+)
+
 install(TARGETS offboard_controller_node
   DESTINATION lib/${PROJECT_NAME})
 
@@ -74,6 +83,9 @@ install(TARGETS lemniscate_trajectory_node
   DESTINATION lib/${PROJECT_NAME})
 
 install(TARGETS height_node
+  DESTINATION lib/${PROJECT_NAME})
+
+install(TARGETS custom_node
   DESTINATION lib/${PROJECT_NAME})
 
 install(PROGRAMS
