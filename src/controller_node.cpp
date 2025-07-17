@@ -117,6 +117,9 @@ rcl_interfaces::msg::SetParametersResult ControllerNode::parametersCallback(cons
             if(param.get_name() == "control_gains.phi"){
                 controller_.setPhi(param.as_double());
             }
+            if(param.get_name() == "control_gains.K_i"){
+                controller_.setKI(param.as_double());
+            }
             
         }
         return result;
@@ -235,12 +238,14 @@ void ControllerNode::loadParams() {
     this->declare_parameter("control_gains.K_p", 0.0);
     this->declare_parameter("control_gains.K_a", 0.0);
     this->declare_parameter("control_gains.phi", 0.0);
+    this->declare_parameter("control_gains.K_i", 0.0);
     
     lambda_i = this->get_parameter("control_gains.lambda_i").as_double();
     lambda_a = this->get_parameter("control_gains.lambda_a").as_double();
     K_p = this->get_parameter("control_gains.K_p").as_double();
     K_a = this->get_parameter("control_gains.K_a").as_double();
     phi = this->get_parameter("control_gains.phi").as_double();
+    K_i = this->get_parameter("control_gains.K_i").as_double();
     controller_type_ = this->get_parameter("control_gains.controller_type").as_string();
     
 
@@ -258,6 +263,7 @@ void ControllerNode::loadParams() {
     controller_.setKP(K_p);
     controller_.setKA(K_a);
     controller_.setPhi(phi);
+    controller_.setKI(K_i);
 }
 
 void ControllerNode::compute_ControlAllocation_and_ActuatorEffect_matrices() {

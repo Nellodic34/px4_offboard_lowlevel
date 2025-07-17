@@ -122,6 +122,7 @@ void controller::calculateSMControllerOutput(Eigen::VectorXd *controller_torque_
 
         double thrust;
         Eigen::Matrix3d R_d_w;
+        Eigen::Vector3d position_error_integral;
 
         // Position error
         const Eigen::Vector3d e_p =
@@ -130,6 +131,9 @@ void controller::calculateSMControllerOutput(Eigen::VectorXd *controller_torque_
         // Velocity error
         const Eigen::Vector3d e_v = 
                 velocity_W_ - r_velocity_W_;
+        
+        // Position error integral
+        position_error_integral += e_p*0.01;
 
         // --- POSITION CONTROL ---
         
@@ -138,7 +142,8 @@ void controller::calculateSMControllerOutput(Eigen::VectorXd *controller_torque_
         
         //Position control input
         Eigen::Vector3d u_peq = _uav_mass * (_gravity * Eigen::Vector3d::UnitZ() + r_acceleration_W_) 
-                                - K_p*s_i/(phi);
+                                - K_p*s_i/(phi)
+                                - K_i*position_error_integral;
         
         thrust = u_peq.dot(R_B_W_.col(2));
 
@@ -178,7 +183,7 @@ void controller::calculateSMControllerOutput(Eigen::VectorXd *controller_torque_
 
         // Attitude control input
         Eigen::Vector3d u_aeq = - K_a*s_a/(phi)
-                                - angular_velocity_B_.cross(_inertia_matrix.asDiagonal() * angular_velocity_B_); 
+                                + angular_velocity_B_.cross(_inertia_matrix.asDiagonal() * angular_velocity_B_); 
 
         // Output the wrench
         *controller_torque_thrust << u_aeq, thrust;

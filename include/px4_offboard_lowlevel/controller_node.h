@@ -142,6 +142,7 @@ private:
     double lambda_a;
     double K_p;
     double K_a;
+    double K_i;
     double phi;
 
     // Errors

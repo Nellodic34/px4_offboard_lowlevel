@@ -120,9 +120,15 @@ public:
         K_a = k;
     }
 
+    void setKI(double k) {
+        K_i = k;
+    }
+
     void setPhi(double phi_value) {
         phi = phi_value;
     }
+
+
 
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 private:
@@ -142,6 +148,7 @@ private:
     double lambda_a;
     double K_p;
     double K_a;
+    double K_i;
     double phi;
 
     // Errors
