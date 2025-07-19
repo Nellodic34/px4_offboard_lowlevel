@@ -156,6 +156,7 @@ private:
     Eigen::Vector3d velocity_error_;
     Eigen::Vector3d attitude_error_;
     Eigen::Vector3d angular_velocity_error_;
+    Eigen::Vector3d position_error_integral;
     
     // Current states
     Eigen::Vector3d position_W_;

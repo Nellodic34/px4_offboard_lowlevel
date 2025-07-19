@@ -52,24 +52,39 @@ public:
 private:
   void publishCirclePose() {
     static double angle = 0.0;
+    static double t = 0.0;
     double radius = 2.0;
 
     geometry_msgs::msg::PoseStamped pose_stamped;
     pose_stamped.header.stamp = this->now();
     pose_stamped.header.frame_id = "base_link"; // Change this to your desired frame ID
 
-    if(angle < 4 * M_PI){
-      pose_stamped.pose.position.x = radius * cos(angle) - radius;
-      pose_stamped.pose.position.y = radius * sin(angle);
+
+    if(t<=2)  
+    {
+      pose_stamped.pose.position.x = 0.0;
+      pose_stamped.pose.position.y = 0.0;
+      pose_stamped.pose.position.z = t;
+      pose_stamped.pose.orientation.w = 1.0;
+
+      t+= 0.01;
+    }
+    else{
+      if(angle < 4 * M_PI){
+
+        pose_stamped.pose.position.x = radius * cos(angle) - radius;
+        pose_stamped.pose.position.y = radius * sin(angle);
       
+      }
+
+      pose_stamped.pose.position.z = 2.0;
+      pose_stamped.pose.orientation.w = 1.0;
+
+      angle += 0.001;
     }
 
-    pose_stamped.pose.position.z = 2.0;
-    pose_stamped.pose.orientation.w = 1.0;
-      
     publisher_->publish(pose_stamped);
-
-    angle += 0.001; // Change this value to control the angular speed of the circular path
+     // Change this value to control the angular speed of the circular path
   }
 
   rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr publisher_;

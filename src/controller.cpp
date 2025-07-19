@@ -107,8 +107,6 @@ void controller::calculateControllerOutput(
     *angular_velocity_error = e_omega;
 }
 
-
-
 void controller::calculateSMControllerOutput(Eigen::VectorXd *controller_torque_thrust, Eigen::Quaterniond *desired_quaternion,  
         Eigen::Vector3d *position_error,
         Eigen::Vector3d *velocity_error, 
@@ -122,8 +120,7 @@ void controller::calculateSMControllerOutput(Eigen::VectorXd *controller_torque_
 
         double thrust;
         Eigen::Matrix3d R_d_w;
-        Eigen::Vector3d position_error_integral;
-
+        
         // Position error
         const Eigen::Vector3d e_p =
                 position_W_ - r_position_W_;
@@ -134,6 +131,9 @@ void controller::calculateSMControllerOutput(Eigen::VectorXd *controller_torque_
         
         // Position error integral
         position_error_integral += e_p*0.01;
+
+        const double max_integral = 0.5;
+        position_error_integral = position_error_integral.cwiseMax(-max_integral).cwiseMin(max_integral);
 
         // --- POSITION CONTROL ---
         

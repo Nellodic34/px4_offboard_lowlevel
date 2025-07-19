@@ -17,30 +17,48 @@ public:
 private:
   void publishLemniscatePose() {
     static double t = 0.0;
+    static double h = 0.0;
     double a = 4.0; // Scale factor for the lemniscate size
 
     geometry_msgs::msg::PoseStamped pose_stamped;
     pose_stamped.header.stamp = this->now();
     pose_stamped.header.frame_id = "base_link"; // Change this to your desired frame ID
 
-    // Lemniscate (figure-8) parametric equations
-    double sin_t = sin(t);
-    double cos_t = cos(t);
-    double denominator = 1.0 + sin_t * sin_t;
+
     
-    if(t < 4 * M_PI){
+    if(h<=2)  
+    {
+      pose_stamped.pose.position.x = 0.0;
+      pose_stamped.pose.position.y = 0.0;
+      pose_stamped.pose.position.z = h;
+      pose_stamped.pose.orientation.w = 1.0;
+
+      h+= 0.01;
+    }
+    else{
+
+    
+    if(t < 4 * M_PI)
+    {
+      // Lemniscate (figure-8) parametric equations
+      double sin_t = sin(t);
+      double cos_t = cos(t);
+      double denominator = 1.0 + sin_t * sin_t;
+
       pose_stamped.pose.position.x = a * cos_t / denominator - a;
       pose_stamped.pose.position.y = a * sin_t * cos_t / denominator;
-    } else {
-      pose_stamped.pose.position.x = 0.0; // Reset position after completing the loop
-      pose_stamped.pose.position.y = 0.0;
+
+      t += 0.001; // Change this value to control the speed along the lemniscate path
+    
+    }  
+
+      pose_stamped.pose.position.z = 2.0;
+      pose_stamped.pose.orientation.w = 1.0;
     }
-    pose_stamped.pose.position.z = 2.0;
-    pose_stamped.pose.orientation.w = 1.0;
 
     publisher_->publish(pose_stamped);
 
-    t += 0.001; // Change this value to control the speed along the lemniscate path
+    
     
   }
 

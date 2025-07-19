@@ -13,10 +13,10 @@
         K_w_x: 0.5
         K_w_y: 0.5
         K_w_z: 0.1
-        lambda_i: 1.0
-        lambda_a: 2.0
-        K_p: 7.0
+        lambda_i: 3.0
+        lambda_a: 7.0
+        K_p: 11.0
         K_a: 0.5
-        phi: 0.8
-        K_i: 1000.0
+        phi: 1.8
+        K_i: 1.0
         controller_type: "sliding_mode"
