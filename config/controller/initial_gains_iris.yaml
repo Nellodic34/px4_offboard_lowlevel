@@ -17,6 +17,6 @@
         lambda_a: 7.0
         K_p: 11.0
         K_a: 0.5
-        phi: 1.8
+        phi: 2.0
         K_i: 1.0
         controller_type: "sliding_mode"
