@@ -67,7 +67,6 @@ RUN mkdir -p ~/ros2_ws/src \
     && cd ~/ros2_ws/src \
     && git clone --single-branch -b release/1.15 https://github.com/PX4/px4_msgs.git \
     && git clone --single-branch -b release/1.15 https://github.com/PX4/px4_ros_com.git \
-    && git clone https://github.com/PasFar/px4_offboard_lowlevel.git \
     && cd .. \
     && . /opt/ros/humble/setup.sh \
     && colcon build
